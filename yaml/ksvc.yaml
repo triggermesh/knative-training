@@ -1,0 +1,21 @@
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: oreilly
+  namespace: sebgoa
+spec:
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+      - image: gcr.io/cloudrun/hello
+        name: user-container
+        readinessProbe:
+          successThreshold: 1
+          tcpSocket:
+            port: 0
+      timeoutSeconds: 300
+  traffic:
+  - latestRevision: true
+    percent: 100

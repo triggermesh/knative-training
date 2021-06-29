@@ -1,0 +1,20 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: hello
+spec:
+  template:
+    metadata:
+      name: hello-00001
+    spec:
+      containers:
+      - image: gcr.io/cloudrun/hello
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 256Mi
+  traffic:
+  - latestRevision: true
+    percent: 100

@@ -1,0 +1,14 @@
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: hello
+spec:
+  template:
+    metadata: {}
+    spec:
+      containerConcurrency: 80
+      containers:
+      - image: gcr.io/cloudrun/hello
+        resources:
+          limits:
+            memory: 256Mi

@@ -1,0 +1,19 @@
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: demo
+spec:
+  template:
+    metadata:
+      name: demo-blue-green
+    spec:
+      containers:
+        - image: gcr.io/knative-samples/knative-route-demo:blue # The URL to the sample app docker image
+          env:
+            - name: T_VERSION
+              value: "blue"
+  traffic:
+  - tag: current
+    revisionName: demo-blue-green
+    percent: 100
+

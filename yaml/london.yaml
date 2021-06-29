@@ -1,0 +1,6 @@
+apiVersion: london.io/v1alpha1
+kind: City
+metadata:
+  name: london
+spec:
+  river: thames
