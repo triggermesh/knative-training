@@ -1,0 +1,46 @@
+apiVersion: sources.knative.dev/v1beta1
+kind: KafkaSource
+metadata:
+  name: my-kafka
+spec:
+  bootstrapServers:
+  - pkc-419q3.us-east4.gcp.confluent.cloud:9092
+  net:
+    sasl:
+      enable: true
+      password:
+        secretKeyRef:
+          key: password
+          name: kafkahackathon
+      type:
+        secretKeyRef:
+          key: sasl.mechanism
+          name: kafkahackathon
+      user:
+        secretKeyRef:
+          key: user
+          name: kafkahackathon
+    tls:
+      caCert:
+        secretKeyRef:
+          key: ca.crt
+          name: kafkahackathon
+          optional: true
+      cert:
+        secretKeyRef:
+          key: user.crt
+          name: kafkahackathon
+          optional: true
+      enable: true
+      key:
+        secretKeyRef:
+          key: user.key
+          name: kafkahackathon
+          optional: true
+  sink:
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: display
+  topics:
+  - hackathon

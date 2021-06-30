@@ -2,7 +2,7 @@
 
 Application Integration via Knative Serving and Eventing
 
-![](./images/knative.png)
+![](./images/knative.png) ![](./images/tmlogo.png)
 
 ---
 
@@ -28,13 +28,19 @@ By Sebastien Goasguen, author of the Docker Cookbook and co-author of Kubernetes
 
 # TriggerMesh Cloud 
 
-## [https://cloud.triggermesh.io](https://cloud.triggermesh.io)
+[https://cloud.triggermesh.io](https://cloud.triggermesh.io)
 
 * **Runs Knative so you don't have to**
 * Exposes some of the Kubernetes API
 * Free + gain time
 
-![](./images/cloudtm.png)
+![](./images/tmcloud.png)
+
+---
+
+# Training TGIK style
+
+![](./images/tgik-repo.png)
 
 ---
 
@@ -43,10 +49,12 @@ By Sebastien Goasguen, author of the Docker Cookbook and co-author of Kubernetes
 
 ### Part I
 * Serverless Intro
+* A look at AWS Lambda and Google CloudRun
 * Knative Installation
 
 ### Part II
 * Knative Serving
+* Auto-scaling
 
 ### Part III
 * Knative Eventing
@@ -116,6 +124,7 @@ Kubernetes example !
 * AWS is the leader
 * "Simple" Pipeline but that can scale
 * Serverless but also **ServiceFull**
+* **Integrations of Services thanks to Events**
 
 ---
 
@@ -137,11 +146,23 @@ How can you build these applications:
 ![](./images/awslambda.png) ![](./images/googlecloudrun.jpg)
 
 * AWS Lambda 		
-* CloudRun 			
+* Google CloudRun 			
 
 ---
 
 # TGIK style ...
+
+![](./images/gologo.png)
+
+---
+
+# AWS Lambda
+
+![](./images/awslambdaui.png)
+
+---
+
+# Google CloudRun
 
 If you have an account on Google cloud you can try it on your own, if not please follow the live demo (creating an account on GCP is not mandatory)
 
@@ -160,6 +181,8 @@ If you have an account on Google cloud you can try it on your own, if not please
 
 ![](./images/cloudrun.png)
 
+See the Web application
+
 ---
 
 # ![](./images/google-cloud-run-logo.png) CloudRun
@@ -174,7 +197,7 @@ gcloud beta run services describe \
 
 ---
 
-# Let's clean the manifest
+# Find the CloudRun manifest
 
 
 * Remove the `status` section
@@ -188,19 +211,17 @@ gcloud beta run services describe \
 
 Two methods:
 
+Copy Paste by Creating a Service using the Icon.
+
+Or:
+
 ```
 kubectl -n <your_id> apply -f foo.yaml
 ```
 
-Or:
-
-Copy Paste by Creating a Service using the Icon.
-
 ---
 
-# Go !
-
-![](./images/gologo.png)
+# How can we get CloudRun on Kubernetes ?
 
 ---
 
@@ -359,6 +380,26 @@ See [https://knative.dev/docs/install/knative-with-contour/](https://knative.dev
 
 ---
 
+# Install the `kn` client
+
+[https://github.com/knative/client/blob/main/docs/README.md](https://github.com/knative/client/blob/main/docs/README.md)
+
+```
+$ kn
+kn is the command line interface for managing Knative Serving and Eventing resources
+
+ Find more information about Knative at: https://knative.dev
+
+Serving Commands:
+  service      Manage Knative services
+  revision     Manage service revisions
+  route        List and describe service routes
+  domain       Manage domain mappings
+
+```
+
+---
+
 # Live Screencast
 
 
@@ -414,7 +455,7 @@ Under the hood still a Deployment and a Pod ...
 # Serving Specification
 
 ```
-apiVersion: serving.knative.dev/v1alpha1
+apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: helloworld-go 
@@ -430,97 +471,49 @@ spec:
 
 `kubectl apply -f hello.yaml` or paste it in the TriggerMesh UI
 
+---
+
+# Checking all "Children"
+
+Let's check it out via some additional bonus
+
+* Let's install [Krew](https://krew.sigs.k8s.io/)
+* Let's install [tree](https://github.com/ahmetb/kubectl-tree)
+
+Then
+
+```
+kubectl tree ksvc hello
+```
 
 ---
 
-# Traffic Splitting
-
-See [Blue/Green with Knative sample](https://knative.dev/docs/serving/samples/blue-green-deployment/)
-
-Route can split traffic between Revisions:
+# Rollout and Traffic Control
 
 ```
-apiVersion: serving.knative.dev/v1alpha1
-kind: Route
-metadata:
-  name: blue-green-demo # Updating our existing route
-spec:
-  traffic:
-    - revisionName: blue-green-demo-00001
-      percent: 50 # Updating the percentage from 100 to 50
-    - revisionName: blue-green-demo-00002
-      percent: 50 # Updating the percentage from 0 to 50
-      name: v2
-```
-
-Let's try it ?
-
----
-
-# Traffic Splitting Sample
-
-* Create the Service object with the UI (paste the yaml and remove the namespace)
-
-```
-apiVersion: serving.knative.dev/v1alpha1
+apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: demo
-spec:
-  template:
-    metadata:
-      name: demo-blue
-    spec:
-      containers:
-        - image: gcr.io/knative-samples/knative-route-demo:blue
-          env:
-            - name: T_VERSION
-              value: "blue"
-  traffic:
-  - tag: current
-    revisionName: demo-blue
-    percent: 100
+  name: helloworld-go
+  namespace: default
+  annotations:
+    serving.knative.dev/rolloutDuration: "380s"
 ```
+
+And
+
+```
+traffic:
+- percent: 99
+  revisionName: config-00008
+- percent: 1
+  revisionName: config-00009
+```
+
 
 ---
 
-# Update the YAML via the UI
-
-Switch to **green**
-
-```
-apiVersion: serving.knative.dev/v1alpha1
-kind: Service
-metadata:
-  name: demo
-spec:
-  template:
-    metadata:
-      name: demo-green
-    spec:
-      containers:
-        - image: gcr.io/knative-samples/knative-route-demo:green
-          env:
-            - name: T_VERSION
-              value: "green"
-  traffic:
-  - tag: green
-    revisionName: demo-green
-    percent: 50
-  - tag: blue
-    revisionName: demo-blue
-    percent: 50
-```
-
----
-
-# Traffic Splitting
-
-![](./images/v1.png)![](./images/v2.png)
-
----
-
-# Building Containers
+# About Building Containers as Functions
 
 But but...
 
@@ -533,6 +526,22 @@ Sure but it will need to run somewhere and be packaged. Containers are a great p
 Originally `Pipeline` project within the Knative github organization. Donated to CNCF at [creation of the CDF foundation](https://www.linuxfoundation.org/press-release/2019/03/the-linux-foundation-announces-new-foundation-to-support-continuous-delivery-collaboration/).
 
 ![](./images/tektonpipe.png)![](./images/tektoncat.png)
+
+---
+
+# TriggerMesh KLR
+
+![](./images/triggermeshklr.png)
+
+And also 
+
+[Build your Own CloudEvent Function](https://github.com/triggermesh/bringyourown)
+
+---
+
+# AutoScaling 
+
+![](./images/autoscale.png)
 
 ---
 
@@ -588,58 +597,86 @@ You may see other channel controllers (e.g Kafka, NATS, GCP PubSub ...)
 Sources, Channels, Triggers, Brokers ...
 
 ```
-apiVersion: sources.eventing.knative.dev/v1alpha1
-kind: CronJobSource
+apiVersion: sources.knative.dev/v1
+kind: PingSource
 metadata:
-  name: test-cronjob-source
+  name: test-pingsource
 spec:
-  schedule: "*/2 * * * *"
-  data: '{"message": "Hello world!"}'
+  schedule: "*/1 * * * *"
+  data
   sink:
-    apiVersion: serving.knative.dev/v1alpha1
-    kind: Service
-    name: event-display
+    ref:
+      apiVersion: v1
+      kind: Service
+      name: sockeye
 ```
 
 ---
 
 # Demo Eventing
 
-1. Run a `message-dumper` service
-2. Run a `CronJob` source
+* 101 Ping Source
+* 102 GitHub Source
+* 201 AWS Sources
+* 301 Kafka Sources and Sinks
+* 401 Writing your Own Sink
+
+---
+
+# Basic Ping
+
+1. Run a `sockeye` service
+2. Run a `Pingsource` source
 
 Check the objects with `kubectl` or `tm`
 
-See [https://github.com/knative/docs/tree/master/docs/eventing/samples/cronjob-source](https://github.com/knative/docs/tree/master/docs/eventing/samples/cronjob-source)
+See [https://knative.dev/docs/eventing/sources/ping-source/](https://knative.dev/docs/eventing/sources/ping-source/)
 
-If time permits, let's do a [GitHub Source ...](https://github.com/knative/docs/tree/master/docs/eventing/samples/github-source)
+Let's do a [GitHub Source ...](https://github.com/knative/docs/tree/master/docs/eventing/samples/github-source)
+
+---
+
+# AWS Sources
+
+![](./images/saws.png)
 
 ---
 
 # Writing your Own Knative Event Source
 
-Check [ksources](https://github.com/sebgoa/ksources)
+Check [https://github.com/triggermesh/bringyourown](https://github.com/triggermesh/bringyourown)
 
 ![](./images/containersource.png)
 
 ---
 
-# Writing your Own Knative Event Source
-
-Can be as simple as packaging a Bash script in a container:
+# Python CloudEvent Handling
 
 ```
-apiVersion: sources.eventing.knative.dev/v1alpha1
-kind: ContainerSource
-metadata:
-  name: bashsample
-spec:
-  image: gcr.io/triggermesh/bash
-  sink:
-    apiVersion: eventing.knative.dev/v1alpha1
-    kind: Channel
-    name: default
+@app.route('/', methods=['POST'])
+def target():
+        
+    # create a CloudEvent
+    event = from_http(request.headers, request.get_data())
+    cejson = json.loads(to_json(event).decode('utf-8'))
+
+    # Do your Transformation or Target work based on the eventype
+    if event['type'] == "io.triggermesh.target.dynamodb.insert":
+        logging.info("Store event in dynamodb")
+        table.put_item(Item=cejson)
+    ...
+
+    return "", 204
+
+if __name__ == '__main__':
+        app.run(host='0.0.0.0', port=8080)
 ```
+
+---
+
+# "Write Tap" to DynamoDB
+
+![](./images/tmeventi)
 
 ---
 
@@ -649,6 +686,8 @@ spec:
 * It provides APIs to build serverless workloads
 * Serving gives you scale to zero
 * Eventing allows you to trigger function when events happen
+* Multicloud service integration is possible with Knative
+* TriggerMesh gives you a Platform to do it simply
 
 Serverless is more than FaaS, it blends Event Driven Architecture (EDA) with new containerized workloads.
 
@@ -657,5 +696,9 @@ Serverless is more than FaaS, it blends Event Driven Architecture (EDA) with new
 # Thank You
 
 **@sebgoa**
+
+Contact TriggerMesh for product demos, knative training and services
+
+**sebgoa@triggermesh.com**
 
 Feedback, contributions to TriggerMesh would be lovely !!!

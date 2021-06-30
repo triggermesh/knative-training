@@ -1,0 +1,12 @@
+apiVersion: eventing.knative.dev/v1alpha1
+kind: KafkaSink
+metadata:
+  name: my-kafka-topic
+spec:
+  auth:
+    secret:
+      ref:
+        name: kafkahackathon
+  bootstrapServers:
+  - pkc-419q3.us-east4.gcp.confluent.cloud:9092
+  topic: hackathon

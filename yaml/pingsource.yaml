@@ -1,0 +1,12 @@
+apiVersion: sources.knative.dev/v1alpha2
+kind: PingSource
+metadata:
+  name: ping-hi
+spec:
+  schedule: "*/1 * * * *"
+  jsonData: '{"message": "Hi Peeps!"}'
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: sockeye

@@ -1,0 +1,18 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: awsdynamodbtarget
+  labels:
+    serving.knative.dev/visibility: cluster-local
+spec:
+  template:
+    spec:
+      containers:
+      - image: gcr.io/triggermesh/awsdynamodbtarget
+        volumeMounts:
+          - name: creds
+            mountPath: /root/.aws
+      volumes:
+      - name: creds
+        secret:
+          secretName: awscredsfile
