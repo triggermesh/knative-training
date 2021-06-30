@@ -1,0 +1,7 @@
+  FROM gcr.io/triggermesh/knative-lambda-python37
+  ENV LAMBDA_TASK_ROOT=/opt
+  ENV LAMBDA_RUNTIME_DIR=/opt
+  COPY . .
+  RUN if [ -f requirements.txt ]; then pip3.7 install -r requirements.txt ;fi
+  CMD ["handler.endpoint"]
+  ENTRYPOINT ["/opt/bootstrap"]

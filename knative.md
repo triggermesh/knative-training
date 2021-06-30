@@ -533,6 +533,8 @@ Originally `Pipeline` project within the Knative github organization. Donated to
 
 ![](./images/triggermeshklr.png)
 
+Get AWS Lambda compatibility [https://github.com/triggermesh/knative-training/tree/main/python](https://github.com/triggermesh/knative-training/tree/main/python)
+
 And also 
 
 [Build your Own CloudEvent Function](https://github.com/triggermesh/bringyourown)
@@ -674,9 +676,11 @@ if __name__ == '__main__':
 
 ---
 
-# "Write Tap" to DynamoDB
+# "Wire Tap" to DynamoDB
 
-![](./images/tmeventi)
+![](./images/tmeventing.png)
+
+Check the code at [https://github.com/triggermesh/knative-training/tree/main/sink](https://github.com/triggermesh/knative-training/tree/main/sink)
 
 ---
 
